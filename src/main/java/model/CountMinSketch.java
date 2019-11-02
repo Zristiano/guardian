@@ -41,6 +41,8 @@ public class CountMinSketch {
 
     private int[][] sketch;
 
+    private Object[][] monitor;
+
     private String[] salts;
 
     public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double dropRate){
@@ -57,8 +59,15 @@ public class CountMinSketch {
         hashSize = (int)Math.ceil(Math.log((1/dropRate)) * Math.E/epsilon);
         sketch = new int[hashCount][hashSize];
         salts = new String[hashCount];
+        // init salt
         for (int i=0; i<hashCount; i++){
             salts[i] = getSalt(i);
+        }
+        // init the monitors for sketch table
+        for(int i=0; i<hashCount; i++){
+            for (int j=0; j<hashSize; j++){
+                monitor[i][j] = new Object();
+            }
         }
     }
 
@@ -66,7 +75,7 @@ public class CountMinSketch {
         char[] salt = BASE_SALT.toCharArray();
         int interval = n*SALT_INTERVAL;
         for(int i=0; i<salt.length; i++){
-            salt[i] = (char)((salt[i]+interval) %256);
+            salt[i] = (char)((salt[i]+interval) % 256);
         }
         return String.valueOf(salt);
     }
@@ -83,8 +92,10 @@ public class CountMinSketch {
     public void request(User usr){
         if(usr==null) return ;
         for(int i=0; i<hashCount; i++){
-            int hash = hash(usr.getID(), i);
-            sketch[i][hash] ++ ;
+            int j = hash(usr.getID(), i);
+            synchronized (monitor[i][j]){
+                sketch[i][j] ++ ;
+            }
         }
     }
 }
