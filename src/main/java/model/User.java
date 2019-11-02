@@ -6,12 +6,18 @@ public class User {
 
     private UUID id = UUID.randomUUID();
 
-    public User(){
+    private String userName;
 
+    public User(String userName){
+        this.userName = userName;
+    }
+
+    public String getID(){
+        return id.toString();
     }
 
     @Override
     public String toString() {
-        return String.format("{id:%s}", id);
+        return String.format("{id:%s, username:%s}", id, userName);
     }
 }
