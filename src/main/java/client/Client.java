@@ -1,19 +1,18 @@
 package client;
 
-import com.google.common.hash.Hashing;
+import model.IMessage;
+import utils.Constants;
+import utils.GdLog;
 
-import java.nio.charset.Charset;
-import java.util.UUID;
+import java.rmi.Naming;
 
 public class Client {
     public static void main(String[] args) {
-        String uuid1 = UUID.randomUUID().toString();
-        String uuid2 = UUID.randomUUID().toString();
-        System.out.println(Hashing.sha256().hashString(uuid1, Charset.forName("UTF-8")).hashCode());
-        System.out.println(Hashing.sha256().hashString(uuid2, Charset.forName("UTF-8")).hashCode());
-        System.out.println(Hashing.sha256().hashString(uuid1, Charset.forName("UTF-8")).hashCode());
-        System.out.println(Hashing.sha256().hashString(uuid2, Charset.forName("UTF-8")).hashCode());
-
+        try {
+            IMessage message = (IMessage) Naming.lookup(Constants.SERVER_URL);
+            GdLog.i(message.greeting());
+        } catch (Exception e) {
+            GdLog.e(e+"");
+        }
     }
-
 }
