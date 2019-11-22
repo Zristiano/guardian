@@ -1,6 +1,8 @@
-package model;
+package client;
 
 import com.google.common.hash.Hashing;
+import model.User;
+import utils.GdLog;
 
 import java.nio.charset.Charset;
 
@@ -28,7 +30,7 @@ public class CountMinSketch {
     /**
      * probability of user event dropping when the count of corresponding user event is less than singleUserQPS - diffLimit
      */
-    private double dropRate;
+    private double errorDropRate;
 
     /**
      * ε
@@ -45,18 +47,18 @@ public class CountMinSketch {
 
     private String[] salts;
 
-    public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double dropRate){
+    public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate){
         epsilon = (double) diffLimit/singleUserQPS ;
         this.overallQPS = overallQPS;
         this.singleUserQPS = singleUserQPS;
-        this.dropRate = dropRate;
+        this.errorDropRate = errorDropRate;
         this.diffLimit = diffLimit;
         init();
     }
 
     private void init(){
-        hashCount = (int)Math.ceil(Math.log((1/dropRate)));
-        hashSize = (int)Math.ceil(Math.log((1/dropRate)) * Math.E/epsilon);
+        hashCount = (int)Math.ceil(Math.log((1/ errorDropRate)));
+        hashSize = (int)Math.ceil(Math.log((1/ errorDropRate)) * Math.E/epsilon);
         sketch = new int[hashCount][hashSize];
         salts = new String[hashCount];
         // init salt
@@ -64,11 +66,13 @@ public class CountMinSketch {
             salts[i] = getSalt(i);
         }
         // init the monitors for sketch table
+        monitor = new Object[hashCount][hashSize];
         for(int i=0; i<hashCount; i++){
             for (int j=0; j<hashSize; j++){
                 monitor[i][j] = new Object();
             }
         }
+        GdLog.i("overallQps:%d, singleQps:%d, diffLimit:%d, errorRate:%f", overallQPS, singleUserQPS, diffLimit, errorDropRate);
     }
 
     private String getSalt(int n){
