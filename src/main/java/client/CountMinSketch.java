@@ -1,16 +1,16 @@
 package client;
 
 import com.google.common.hash.Hashing;
+import model.IBinder;
 import model.User;
+import utils.Constants;
 import utils.GdLog;
 
 import java.nio.charset.Charset;
+import java.rmi.RemoteException;
+import java.util.Random;
 
 public class CountMinSketch {
-
-    public static String BASE_SALT = "Roger1Ding2Zristiano3";
-
-    public static int SALT_INTERVAL = 1;
 
     /**
      * Max QPS supported by the system
@@ -43,9 +43,13 @@ public class CountMinSketch {
 
     private int[][] sketch;
 
+    private int[][] dropTable;
+
     private Object[][] monitor;
 
     private String[] salts;
+
+    private Random random;
 
     public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate){
         epsilon = (double) diffLimit/singleUserQPS ;
@@ -57,9 +61,14 @@ public class CountMinSketch {
     }
 
     private void init(){
+
+        random = new Random();
+
         hashCount = (int)Math.ceil(Math.log((1/ errorDropRate)));
         hashSize = (int)Math.ceil(Math.log((1/ errorDropRate)) * Math.E/epsilon);
         sketch = new int[hashCount][hashSize];
+        dropTable = new int[hashCount][hashSize];
+
         salts = new String[hashCount];
         // init salt
         for (int i=0; i<hashCount; i++){
@@ -72,12 +81,13 @@ public class CountMinSketch {
                 monitor[i][j] = new Object();
             }
         }
+
         GdLog.i("overallQps:%d, singleQps:%d, diffLimit:%d, errorRate:%f", overallQPS, singleUserQPS, diffLimit, errorDropRate);
     }
 
     private String getSalt(int n){
-        char[] salt = BASE_SALT.toCharArray();
-        int interval = n*SALT_INTERVAL;
+        char[] salt = Constants.BASE_SALT.toCharArray();
+        int interval = n*Constants.SALT_INTERVAL;
         for(int i=0; i<salt.length; i++){
             salt[i] = (char)((salt[i]+interval) % 256);
         }
@@ -86,8 +96,9 @@ public class CountMinSketch {
 
     private int hash(String key, int i){
         int hashCode = Hashing.sha256().hashString(key+salts[i], Charset.forName("UTF-8")).hashCode() ;
-        return (int)(((long)hashCode) % hashSize);
+        return (int)(Math.abs((long)hashCode) % hashSize);
     }
+
 
     /**
      * update the hash table when a user request comes in
@@ -100,6 +111,29 @@ public class CountMinSketch {
             synchronized (monitor[i][j]){
                 sketch[i][j] ++ ;
             }
+        }
+    }
+
+    public boolean isBlock(User usr){
+        if(usr==null) return true;
+        int lastQPS = Integer.MAX_VALUE;
+        for(int i=0; i<hashCount; i++){
+            int j = hash(usr.getID(), i);
+            lastQPS = Math.min(lastQPS, dropTable[i][j]);
+        }
+
+        if (lastQPS<singleUserQPS) return true;
+        int expectedDropCount = lastQPS - singleUserQPS;
+        int rd = random.nextInt(lastQPS);
+        return rd<expectedDropCount;
+    }
+
+    public void syncDropTable(IBinder binder){
+        try {
+            // TODO: 2019/11/23 这里有很多异步问题需要解决
+            dropTable = binder.assembleUserRequest(Constants.CLIENT_1, sketch);
+        } catch (RemoteException e) {
+            GdLog.e(e+"");
         }
     }
 }
