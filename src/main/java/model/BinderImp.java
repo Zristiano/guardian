@@ -11,8 +11,12 @@ public class BinderImp extends UnicastRemoteObject implements IBinder{
         super();
     }
 
-    public SketchProperty getSKetchProperty() throws RemoteException{
+    public SketchProperty getSketchProperty() throws RemoteException{
         SketchProperty property =  RateController.getInstance().getSketchProperty();
         return property;
+    }
+
+    public int[][] assembleUserRequest(String client, int[][] sketch) throws RemoteException {
+        return RateController.getInstance().assembleSketch(client, sketch);
     }
 }
