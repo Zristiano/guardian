@@ -14,6 +14,11 @@ import java.rmi.RemoteException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.quartz.*;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
+
 public class Client {
 
     private static Client INSTANCE;
@@ -32,8 +37,33 @@ public class Client {
             IBinder binder = (IBinder) Naming.lookup(Constants.SERVER_URL);
             SketchProperty property = binder.getSketchProperty();
             rateLimiter = new RateLimiter(property);
-            UpdateJob updateJob = new UpdateJob(binder);
-            new Timer().scheduleAtFixedRate(updateJob,1000,1000);
+            
+            // UpdateJob updateJob = new UpdateJob(binder);
+            // new Timer().scheduleAtFixedRate(updateJob,1000,1000);
+            
+            /** Quartz **/
+            
+            SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
+            Scheduler sched = schedFact.getScheduler();
+            sched.start();
+
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.put("binder", binder);
+
+            JobDetail job = newJob(DropTableUpdateJob.class)
+                    .withIdentity("dropTable", "group-1")
+                    .setJobData(jobDataMap)
+                    .build();
+
+            Trigger trigger = newTrigger()
+                    .withIdentity("dropTableTrigger", "group-1")
+                    .startNow()
+                    .withSchedule(simpleSchedule().withIntervalInMilliseconds(1000).repeatForever())
+                    .build();
+            
+            sched.scheduleJob(job, trigger);
+            
+            
         } catch (RemoteException e) {
             GdLog.e(e+"");
         } catch (NotBoundException e) {
@@ -43,6 +73,14 @@ public class Client {
         }
     }
 
+    public static class DropTableUpdateJob implements Job {
+        public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+            JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
+            IBinder binder = (IBinder) dataMap.get("binder");
+            Client.getInstance().rateLimiter.syncDropTable(binder);
+        }
+    }
+    
     public static class UpdateJob extends TimerTask{
         private IBinder binder;
 
