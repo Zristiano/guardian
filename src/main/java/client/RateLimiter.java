@@ -18,7 +18,7 @@ public class RateLimiter {
     public boolean request(User user){
         sketch.request(user);
         boolean isBlock = sketch.isBlock(user);
-        return isBlock;
+        return !isBlock;
     }
 
     public void syncDropTable(IBinder binder){
