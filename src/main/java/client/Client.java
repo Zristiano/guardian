@@ -56,19 +56,37 @@ public class Client {
     }
 
     private void runUserRequest(){
-        User user = new User("user1");
-        for(int i=0; i<300; i++){
-            GdLog.i("request: " + rateLimiter.request(user));
+        int userNum = 300;
+        User[] users = new User[userNum];
+        for (int i=0; i<userNum; i++){
+            users[i] = new User("user"+i);
+        }
+        int[] passCount = new int[userNum];
+        int[] blockCount = new int[userNum];
+        long startTime = System.currentTimeMillis();
+        for(int i=0; i<60000; i++){
+            for (int j=0; j<userNum; j++){
+                if (rateLimiter.request(users[j])){
+                    passCount[j] ++ ;
+                }else {
+                    blockCount[j] ++;
+                }
+            }
             try {
-                Thread.sleep(10);
+                Thread.sleep(2);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+        long endTime = System.currentTimeMillis();
+        for(int i=0; i<userNum; i++){
+            GdLog.i("duration:%d  passCount:%d  blockCount:%d" ,endTime-startTime, passCount[i], blockCount[i]);
         }
     }
 
 
     public static void main(String[] args) {
+
         Client.getInstance().start();
         Client.getInstance().runUserRequest();
     }

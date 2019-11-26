@@ -2,12 +2,14 @@ package client;
 
 import com.google.common.hash.Hashing;
 import model.IBinder;
+import model.LRUCache;
 import model.User;
 import utils.Constants;
 import utils.GdLog;
 
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.Random;
 
 public class CountMinSketch {
@@ -51,6 +53,8 @@ public class CountMinSketch {
 
     private Random random;
 
+    private LRUCache<String, int[]> hashPosCache;
+
     public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate){
         epsilon = (double) diffLimit/singleUserQPS ;
         this.overallQPS = overallQPS;
@@ -63,6 +67,7 @@ public class CountMinSketch {
     private void init(){
 
         random = new Random();
+        hashPosCache = new LRUCache<>(Constants.HASH_CACHE_SIZE);
 
         hashCount = (int)Math.ceil(Math.log((1/ errorDropRate)));
         hashSize = (int)Math.ceil(Math.log((1/ errorDropRate)) * Math.E/epsilon);
@@ -72,7 +77,8 @@ public class CountMinSketch {
         salts = new String[hashCount];
         // init salt
         for (int i=0; i<hashCount; i++){
-            salts[i] = getSalt(i);
+            salts[i] = generateSalt(i);
+            GdLog.i("salt[%d]=%s",i,salts[i]);
         }
         // init the monitors for sketch table
         monitor = new Object[hashCount][hashSize];
@@ -85,18 +91,24 @@ public class CountMinSketch {
         GdLog.i("overallQps:%d, singleQps:%d, diffLimit:%d, errorRate:%f", overallQPS, singleUserQPS, diffLimit, errorDropRate);
     }
 
-    private String getSalt(int n){
-        char[] salt = Constants.BASE_SALT.toCharArray();
-        int interval = n*Constants.SALT_INTERVAL;
-        for(int i=0; i<salt.length; i++){
-            salt[i] = (char)((salt[i]+interval) % 256);
-        }
-        return String.valueOf(salt);
+    private String generateSalt(int n){
+        byte[] saltBytes = new byte[random.nextInt(50)];
+        random.nextBytes(saltBytes);
+        return new String(saltBytes, Charset.forName("UTF-8"));
     }
 
     private int hash(String key, int i){
-        int hashCode = Hashing.sha256().hashString(key+salts[i], Charset.forName("UTF-8")).hashCode() ;
-        return (int)(Math.abs((long)hashCode) % hashSize);
+        int[] hashPos = hashPosCache.get(key);
+        if (hashPos == null){
+            hashPos = new int[hashCount];
+            Arrays.fill(hashPos, -1);
+            hashPosCache.put(key,hashPos);
+        }
+        if (hashPos[i]<0) {
+            int hashCode = Hashing.sha256().hashString(key+salts[i], Charset.forName("UTF-8")).hashCode() ;
+            hashPos[i] = (int)(Math.abs((long)hashCode) % hashSize);
+        }
+        return hashPos[i];
     }
 
 
@@ -111,6 +123,7 @@ public class CountMinSketch {
             synchronized (monitor[i][j]){
                 sketch[i][j] ++ ;
             }
+//            GdLog.i("hash sketch[%d][%d]:%d",i, j, sketch[i][j]);
         }
     }
 
@@ -122,8 +135,9 @@ public class CountMinSketch {
             lastQPS = Math.min(lastQPS, dropTable[i][j]);
         }
 
-        if (lastQPS<singleUserQPS) return true;
+        if (lastQPS<singleUserQPS) return false;
         int expectedDropCount = lastQPS - singleUserQPS;
+//        GdLog.i("lastQPS:%d, expectedDropCount:%d", lastQPS, expectedDropCount);
         int rd = random.nextInt(lastQPS);
         return rd<expectedDropCount;
     }
@@ -131,7 +145,11 @@ public class CountMinSketch {
     public void syncDropTable(IBinder binder){
         try {
             // TODO: 2019/11/23 这里有很多异步问题需要解决
+            long startTime = System.currentTimeMillis();
             dropTable = binder.assembleUserRequest(Constants.CLIENT_1, sketch);
+            long duration = System.currentTimeMillis()-startTime;
+//            GdLog.i("sync duration : "+duration);
+            sketch = new int[hashCount][hashSize];
         } catch (RemoteException e) {
             GdLog.e(e+"");
         }
