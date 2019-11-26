@@ -42,26 +42,30 @@ public class Client {
             // new Timer().scheduleAtFixedRate(updateJob,1000,1000);
             
             /** Quartz **/
-            
-            SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
-            Scheduler sched = schedFact.getScheduler();
-            sched.start();
+            try {
+                SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
+                Scheduler sched = schedFact.getScheduler();
+                sched.start();
 
-            JobDataMap jobDataMap = new JobDataMap();
-            jobDataMap.put("binder", binder);
+                JobDataMap jobDataMap = new JobDataMap();
+                jobDataMap.put("binder", binder);
 
-            JobDetail job = newJob(DropTableUpdateJob.class)
-                    .withIdentity("dropTable", "group-1")
-                    .setJobData(jobDataMap)
-                    .build();
+                JobDetail job = newJob(DropTableUpdateJob.class)
+                        .withIdentity("dropTable", "group-1")
+                        .setJobData(jobDataMap)
+                        .build();
 
-            Trigger trigger = newTrigger()
-                    .withIdentity("dropTableTrigger", "group-1")
-                    .startNow()
-                    .withSchedule(simpleSchedule().withIntervalInMilliseconds(1000).repeatForever())
-                    .build();
-            
-            sched.scheduleJob(job, trigger);
+                Trigger trigger = newTrigger()
+                        .withIdentity("dropTableTrigger", "group-1")
+                        .startNow()
+                        .withSchedule(simpleSchedule().withIntervalInMilliseconds(1000).repeatForever())
+                        .build();
+
+                sched.scheduleJob(job, trigger);
+            }catch (SchedulerException e){
+                GdLog.e(""+e);
+            }
+
             
             
         } catch (RemoteException e) {
