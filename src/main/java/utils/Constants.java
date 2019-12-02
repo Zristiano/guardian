@@ -15,4 +15,6 @@ public class Constants {
     public static final String CLIENT_1 = "client_1";
 
     public static final int HASH_CACHE_SIZE = 100;
+
+    public static final String REQUEST_LOG_PATH = "target/request.log";
 }
