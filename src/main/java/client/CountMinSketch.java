@@ -56,7 +56,7 @@ public class CountMinSketch {
     private LRUCache<String, int[]> hashPosCache;
 
     public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate){
-        epsilon = (double) diffLimit/singleUserQPS ;
+        epsilon = (double) diffLimit/overallQPS ;
         this.overallQPS = overallQPS;
         this.singleUserQPS = singleUserQPS;
         this.errorDropRate = errorDropRate;
@@ -70,6 +70,7 @@ public class CountMinSketch {
         hashPosCache = new LRUCache<>(Constants.HASH_CACHE_SIZE);
 
         hashCount = (int)Math.ceil(Math.log((1/ errorDropRate)));
+//        hashCount = 100;
         hashSize = (int)Math.ceil(Math.log((1/ errorDropRate)) * Math.E/epsilon);
         sketch = new int[hashCount][hashSize];
         dropTable = new int[hashCount][hashSize];
@@ -88,7 +89,7 @@ public class CountMinSketch {
             }
         }
 
-        GdLog.i("overallQps:%d, singleQps:%d, diffLimit:%d, errorRate:%f", overallQPS, singleUserQPS, diffLimit, errorDropRate);
+        GdLog.i("overallQps:%d, singleQps:%d, diffLimit:%d, errorRate:%f,  hashCount:%d, hashSize:%d", overallQPS, singleUserQPS, diffLimit, errorDropRate, hashCount, hashSize);
     }
 
     private String generateSalt(int n){
@@ -114,12 +115,12 @@ public class CountMinSketch {
 
     /**
      * update the hash table when a user request comes in
-     * @param usr user
+     * @param userId user
      */
-    public void request(User usr){
-        if(usr==null) return ;
+    public void request(String userId){
+        if(userId==null) return ;
         for(int i=0; i<hashCount; i++){
-            int j = hash(usr.getID(), i);
+            int j = hash(userId, i);
             synchronized (monitor[i][j]){
                 sketch[i][j] ++ ;
             }
@@ -127,11 +128,11 @@ public class CountMinSketch {
         }
     }
 
-    public boolean isBlock(User usr){
-        if(usr==null) return true;
+    public boolean isBlock(String usrId){
+        if(usrId==null) return true;
         int lastQPS = Integer.MAX_VALUE;
         for(int i=0; i<hashCount; i++){
-            int j = hash(usr.getID(), i);
+            int j = hash(usrId, i);
             lastQPS = Math.min(lastQPS, dropTable[i][j]);
         }
 
