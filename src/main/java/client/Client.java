@@ -1,12 +1,13 @@
 package client;
 
 import model.IBinder;
-import model.IMessage;
 import model.SketchProperty;
 import model.User;
 import utils.Constants;
 import utils.GdLog;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -40,7 +41,7 @@ public class Client {
             SketchProperty property = binder.getSketchProperty();
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
-            requestLogger.initMode(RequestLogger.MODE_DIRECT);
+            requestLogger.initMode(RequestLogger.MODE_BUFFERED);
             // UpdateJob updateJob = new UpdateJob(binder);
             // new Timer().scheduleAtFixedRate(updateJob,1000,1000);
             
@@ -114,7 +115,7 @@ public class Client {
                 }else {
                     blockCount[j] ++;
                 }
-                requestLogger.log(request);
+//                requestLogger.log(request);
             }
 //            try {
 //                Thread.sleep(2);
@@ -130,19 +131,31 @@ public class Client {
         GdLog.i("close requestLogger");
     }
 
-    public static void main(String[] args) {
-        Client.getInstance().start();
-        Client.getInstance().runUserRequest();
-
+    private void runUserRequest1(){
+        RequestGenerator requestGenerator = new RequestGenerator(10);
+        requestGenerator.setUserFrequency(3, 5);
+        for (int i=0; i<100; i++){
+            User user = requestGenerator.getRandomUser(10);
+            GdLog.i(user.toString()+"\n");
+        }
     }
 
+    public static void main(String[] args) {
+//        Client.getInstance().start();
+        Client.getInstance().runUserRequest1();
+    }
 
-    private void testRMIClient(){
+    private void produceUser(int num){
         try {
-            IMessage message = (IMessage) Naming.lookup(Constants.SERVER_URL);
-            GdLog.i(message.greeting());
-        } catch (Exception e) {
-            GdLog.e(e+"");
+            FileWriter writer = new FileWriter(Constants.USERS_INFO_PATH);
+            for (int i=0; i<num; i++){
+                User user = new User("user"+i);
+                writer.write(user.toString()+"\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
