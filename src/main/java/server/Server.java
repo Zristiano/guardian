@@ -1,8 +1,6 @@
 package server;
 
 import model.BinderImp;
-import model.HelloMessage;
-import model.IBinder;
 import utils.Constants;
 import utils.GdLog;
 
@@ -26,14 +24,4 @@ public class Server {
         }
     }
 
-    private void testRMIServer(){
-        try {
-            System.setProperty("java.rmi.server.hostname","127.0.0.1");
-            HelloMessage helloMessage = new HelloMessage();
-            Registry registry = LocateRegistry.createRegistry(Constants.RMI_PORT);
-            registry.bind(Constants.SERVICE, helloMessage);
-        } catch (Exception e) {
-            GdLog.e(e+"");
-        }
-    }
 }

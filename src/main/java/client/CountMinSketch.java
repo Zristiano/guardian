@@ -55,12 +55,14 @@ public class CountMinSketch {
 
     private LRUCache<String, int[]> hashPosCache;
 
-    public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate){
+    public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate, String[] salts){
         epsilon = (double) diffLimit/overallQPS ;
         this.overallQPS = overallQPS;
         this.singleUserQPS = singleUserQPS;
         this.errorDropRate = errorDropRate;
         this.diffLimit = diffLimit;
+
+        this.salts = Arrays.copyOf(salts,salts.length);
         init();
     }
 
@@ -75,12 +77,6 @@ public class CountMinSketch {
         sketch = new int[hashCount][hashSize];
         dropTable = new int[hashCount][hashSize];
 
-        salts = new String[hashCount];
-        // init salt
-        for (int i=0; i<hashCount; i++){
-            salts[i] = generateSalt(i);
-            GdLog.i("salt[%d]=%s",i,salts[i]);
-        }
         // init the monitors for sketch table
         monitor = new Object[hashCount][hashSize];
         for(int i=0; i<hashCount; i++){
@@ -90,12 +86,6 @@ public class CountMinSketch {
         }
 
         GdLog.i("overallQps:%d, singleQps:%d, diffLimit:%d, errorRate:%f,  hashCount:%d, hashSize:%d", overallQPS, singleUserQPS, diffLimit, errorDropRate, hashCount, hashSize);
-    }
-
-    private String generateSalt(int n){
-        byte[] saltBytes = new byte[random.nextInt(50)];
-        random.nextBytes(saltBytes);
-        return new String(saltBytes, Charset.forName("UTF-8"));
     }
 
     private int hash(String key, int i){
