@@ -133,11 +133,11 @@ public class CountMinSketch {
         return rd<expectedDropCount;
     }
 
-    public void syncDropTable(IBinder binder){
+    public void syncDropTable(String client, IBinder binder){
         try {
             // TODO: 2019/11/23 这里有很多异步问题需要解决
             long startTime = System.currentTimeMillis();
-            dropTable = binder.assembleUserRequest(Constants.CLIENT_1, sketch);
+            dropTable = binder.assembleUserRequest(client, sketch);
             long duration = System.currentTimeMillis()-startTime;
 //            GdLog.i("sync duration : "+duration);
             sketch = new int[hashCount][hashSize];

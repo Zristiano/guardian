@@ -1,6 +1,7 @@
 package server;
 
 import model.SketchProperty;
+import utils.GdLog;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +26,7 @@ public class RateController {
 
     private void init(){
         // TODO: 2019/11/22 it supposed to parse the parameters from a meta-data file (e.g. xml, yaml)
-        sketchProperty = new SketchProperty(1000,50,10, 0.001);
+        sketchProperty = new SketchProperty(10000,50,10, 0.001);
         sketchMap = new ConcurrentHashMap<String, int[][]>();
     }
 
@@ -34,6 +35,7 @@ public class RateController {
     }
 
     public int[][] assembleSketch(String client, int[][] sketch){
+        GdLog.i(Thread.currentThread().toString() + "   "+ client+"   "+Thread.currentThread().getId());
         int[][] sum = new int[sketch.length][sketch[0].length];
         sketchMap.put(client, sketch);
         ArrayList<int[][]> sketchList = new ArrayList<int[][]>(sketchMap.values());

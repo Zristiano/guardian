@@ -81,7 +81,7 @@ public class Client {
         public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
             JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
             IBinder binder = (IBinder) dataMap.get("binder");
-            Client.getInstance().rateLimiter.syncDropTable(binder);
+            Client.getInstance().rateLimiter.syncDropTable(Constants.CLIENT_0, binder);
         }
     }
     
@@ -93,7 +93,7 @@ public class Client {
         }
 
         public void run() {
-            Client.getInstance().rateLimiter.syncDropTable(binder);
+            Client.getInstance().rateLimiter.syncDropTable(Constants.CLIENT_0, binder);
         }
     }
 
@@ -107,21 +107,21 @@ public class Client {
         int[] blockCount = new int[userNum];
         long startTime = System.currentTimeMillis();
         GdLog.i("runUsrRequest");
-        for(int i=0; i<6000; i++){
+        for(int i=0; i<10000; i++){
             for (int j=0; j<userNum; j++){
                 Request request = new Request(users[j].getID());
                 if (rateLimiter.request(request)){
                     passCount[j] ++ ;
-                }else {
+                } else {
                     blockCount[j] ++;
                 }
-//                requestLogger.log(request);
+                requestLogger.log(request);
             }
-//            try {
-//                Thread.sleep(2);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                Thread.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         long endTime = System.currentTimeMillis();
         for(int i=0; i<userNum; i++){
@@ -147,9 +147,9 @@ public class Client {
     }
 
     public static void main(String[] args) {
-//        Client.getInstance().start();
-//        Client.getInstance().runUserRequest1();
-        Client.getInstance().produceUser(500000);
+        Client.getInstance().start();
+        Client.getInstance().runUserRequest();
+//        Client.getInstance().produceUser(500000);
     }
 
     private void produceUser(int num){
