@@ -134,15 +134,22 @@ public class Client {
     private void runUserRequest1(){
         RequestGenerator requestGenerator = new RequestGenerator(10);
         requestGenerator.setUserFrequency(3, 5);
-        for (int i=0; i<100; i++){
+        for (int i=0; i<10000; i++){
             User user = requestGenerator.getRandomUser(10);
+            if (i==4000){
+                requestGenerator.setUserFrequency(4,40);
+            }
+            Request request = new Request(user.getID());
+            rateLimiter.request(request);
+            requestLogger.log(request);
             GdLog.i(user.toString()+"\n");
         }
     }
 
     public static void main(String[] args) {
 //        Client.getInstance().start();
-        Client.getInstance().runUserRequest1();
+//        Client.getInstance().runUserRequest1();
+        Client.getInstance().produceUser(500000);
     }
 
     private void produceUser(int num){
