@@ -30,20 +30,30 @@ public class SketchProperty implements Cloneable, Serializable {
      */
     private double errorDropRate;
 
+    /**
+     * ε
+     */
+    private double epsilon;
+
     private int hashCount;
+
+    private int hashSize;
 
     private String[] salts;
 
     public SketchProperty(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate){
+        epsilon = (double) diffLimit/overallQPS ;
         this.overallQPS = overallQPS;
         this.singleUserQPS = singleUserQPS;
         this.errorDropRate = errorDropRate;
         this.diffLimit = diffLimit;
+        hashCount = (int)Math.ceil(Math.log((1/ errorDropRate)));
+        hashSize = (int)Math.ceil(Math.log((1/ errorDropRate)) * Math.E/epsilon);
         initSalt();
     }
 
     private void initSalt(){
-        hashCount = (int)Math.ceil(Math.log((1/ errorDropRate)));
+
         salts = new String[hashCount];
         // init salt
         for (int i=0; i<hashCount; i++){
@@ -77,6 +87,14 @@ public class SketchProperty implements Cloneable, Serializable {
 
     public double getErrorDropRate() {
         return errorDropRate;
+    }
+
+    public int getHashCount(){
+        return hashCount;
+    }
+
+    public int getHashSize(){
+        return hashSize;
     }
 
 }

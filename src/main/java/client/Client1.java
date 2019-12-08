@@ -20,6 +20,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Client1 {
+
     private static Client1 INSTANCE;
 
     public static Client1 getInstance(){
@@ -71,8 +72,6 @@ public class Client1 {
         } catch (RemoteException | NotBoundException | MalformedURLException e) {
             GdLog.e(e+"");
         }
-
-
     }
 
     public static class DropTableUpdateJob implements Job {

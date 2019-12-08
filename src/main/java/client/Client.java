@@ -41,7 +41,7 @@ public class Client {
             SketchProperty property = binder.getSketchProperty();
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
-            requestLogger.initMode(RequestLogger.MODE_BUFFERED);
+            requestLogger.initMode(RequestLogger.MODE_DIRECT);
             // UpdateJob updateJob = new UpdateJob(binder);
             // new Timer().scheduleAtFixedRate(updateJob,1000,1000);
             
@@ -73,8 +73,6 @@ public class Client {
         } catch (RemoteException | NotBoundException | MalformedURLException e) {
             GdLog.e(e+"");
         }
-
-
     }
 
     public static class DropTableUpdateJob implements Job {
@@ -117,11 +115,11 @@ public class Client {
                 }
                 requestLogger.log(request);
             }
-            try {
-                Thread.sleep(2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(2);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
         long endTime = System.currentTimeMillis();
         for(int i=0; i<userNum; i++){
@@ -142,8 +140,8 @@ public class Client {
             Request request = new Request(user.getID());
             rateLimiter.request(request);
             requestLogger.log(request);
-            GdLog.i(user.toString()+"\n");
         }
+        requestLogger.close();
     }
 
     public static void main(String[] args) {

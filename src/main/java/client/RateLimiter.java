@@ -19,12 +19,9 @@ public class RateLimiter {
 
     public RateLimiter(SketchProperty sketchProperty){
         property = sketchProperty;
-        sketch = new CountMinSketch(property.getOverallQPS(),
-                property.getSingleUserQPS(),
-                property.getDiffLimit(),
-                property.getErrorDropRate(),
-                property.getSalts());
+        sketch = new CountMinSketch(property);
         reqCount = new AtomicInteger(0);
+        dropTableUpdateTs = System.currentTimeMillis();
     }
 
     public boolean request(Request req){

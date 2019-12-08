@@ -3,6 +3,7 @@ package client;
 import com.google.common.hash.Hashing;
 import model.IBinder;
 import model.LRUCache;
+import model.SketchProperty;
 import model.User;
 import utils.Constants;
 import utils.GdLog;
@@ -55,14 +56,15 @@ public class CountMinSketch {
 
     private LRUCache<String, int[]> hashPosCache;
 
-    public CountMinSketch(int overallQPS, int singleUserQPS, int diffLimit, double errorDropRate, String[] salts){
-        epsilon = (double) diffLimit/overallQPS ;
-        this.overallQPS = overallQPS;
-        this.singleUserQPS = singleUserQPS;
-        this.errorDropRate = errorDropRate;
-        this.diffLimit = diffLimit;
+    public CountMinSketch(SketchProperty sketchProperty){
+        this.overallQPS = sketchProperty.getOverallQPS();
+        this.singleUserQPS = sketchProperty.getSingleUserQPS();
+        this.errorDropRate = sketchProperty.getErrorDropRate();
+        this.diffLimit = sketchProperty.getDiffLimit();
 
-        this.salts = Arrays.copyOf(salts,salts.length);
+        this.hashCount = sketchProperty.getHashCount();
+        this.hashSize = sketchProperty.getHashSize();
+        this.salts = Arrays.copyOf(sketchProperty.getSalts(),sketchProperty.getSalts().length);
         init();
     }
 
@@ -71,9 +73,6 @@ public class CountMinSketch {
         random = new Random();
         hashPosCache = new LRUCache<>(Constants.HASH_CACHE_SIZE);
 
-        hashCount = (int)Math.ceil(Math.log((1/ errorDropRate)));
-//        hashCount = 100;
-        hashSize = (int)Math.ceil(Math.log((1/ errorDropRate)) * Math.E/epsilon);
         sketch = new int[hashCount][hashSize];
         dropTable = new int[hashCount][hashSize];
 
@@ -135,11 +134,10 @@ public class CountMinSketch {
 
     public void syncDropTable(String client, IBinder binder){
         try {
-            // TODO: 2019/11/23 这里有很多异步问题需要解决
             long startTime = System.currentTimeMillis();
             dropTable = binder.assembleUserRequest(client, sketch);
             long duration = System.currentTimeMillis()-startTime;
-//            GdLog.i("sync duration : "+duration);
+//            GdLog.i("client:%s, sync duration: %d", client, duration);
             sketch = new int[hashCount][hashSize];
         } catch (RemoteException e) {
             GdLog.e(e+"");

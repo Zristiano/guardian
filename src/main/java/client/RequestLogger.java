@@ -13,8 +13,14 @@ import java.util.TimerTask;
 
 public class RequestLogger {
 
+    /**
+     * Not thread safe when writing logs
+     */
     public static final int MODE_DIRECT = 0;
 
+    /**
+     * Thread safe when writing logs
+     */
     public static final int MODE_BUFFERED = 1;
 
     private int mode;
@@ -63,7 +69,7 @@ public class RequestLogger {
         }
 
         @Override
-        public void log(Request request) {
+        public synchronized void log(Request request) {
             try {
                 fileWriter.write(request.toString()+"\n");
             } catch (IOException e) {
@@ -82,6 +88,9 @@ public class RequestLogger {
         }
     }
 
+    /**
+     * BufferedLogger is thread-safe for writing log file
+     */
     private class BufferedLogger extends RequestLogger{
 
         private StreamPrinter<Request> printer;
