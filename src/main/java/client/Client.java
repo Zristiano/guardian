@@ -107,7 +107,7 @@ public class Client {
         int[] blockCount = new int[userNum];
         long startTime = System.currentTimeMillis();
         GdLog.i("runUsrRequest");
-        for(int i=0; i<10000; i++){
+        for(int i=0; i<1000; i++){
             for (int j=0; j<userNum; j++){
                 Request request = new Request(users[j].getID());
                 if (rateLimiter.request(request)){
@@ -144,6 +144,7 @@ public class Client {
             requestLogger.log(request);
             GdLog.i(user.toString()+"\n");
         }
+        requestLogger.close();
     }
 
     public static void main(String[] args) {

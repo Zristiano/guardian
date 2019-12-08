@@ -13,8 +13,14 @@ import java.util.TimerTask;
 
 public class RequestLogger {
 
+    /**
+     * Not thread safe when writing logs
+     */
     public static final int MODE_DIRECT = 0;
 
+    /**
+     * Thread safe when writing logs
+     */
     public static final int MODE_BUFFERED = 1;
 
     private int mode;
