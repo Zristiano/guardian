@@ -3,4 +3,6 @@ target/
 output/*
 *.iml
 src/main/.DS_Store
-src/main/java/resources/reuqest*
+src/main/resources/request.log
+
+

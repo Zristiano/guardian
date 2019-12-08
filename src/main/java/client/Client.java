@@ -3,6 +3,7 @@ package client;
 import model.IBinder;
 import model.SketchProperty;
 import model.User;
+import org.quartz.impl.StdSchedulerFactory;
 import utils.Constants;
 import utils.GdLog;
 
@@ -35,9 +36,11 @@ public class Client {
 
     private RequestLogger requestLogger;
 
+    private IBinder binder;
+
     private void start(){
         try {
-            IBinder binder = (IBinder) Naming.lookup(Constants.SERVER_URL);
+            binder = (IBinder) Naming.lookup(Constants.SERVER_URL);
             SketchProperty property = binder.getSketchProperty();
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
@@ -47,25 +50,8 @@ public class Client {
             
             /** Quartz **/
             try {
-                SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
-                Scheduler sched = schedFact.getScheduler();
-                sched.start();
-
-                JobDataMap jobDataMap = new JobDataMap();
-                jobDataMap.put("binder", binder);
-
-                JobDetail job = newJob(DropTableUpdateJob.class)
-                        .withIdentity("dropTable", "group-1")
-                        .setJobData(jobDataMap)
-                        .build();
-
-                Trigger trigger = newTrigger()
-                        .withIdentity("dropTableTrigger", "group-1")
-                        .startNow()
-                        .withSchedule(simpleSchedule().withIntervalInMilliseconds(1000).repeatForever())
-                        .build();
-
-                sched.scheduleJob(job, trigger);
+                Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+                scheduler.start();
             }catch (Exception e){
                 GdLog.e(""+e);
             }
@@ -75,26 +61,6 @@ public class Client {
         }
 
 
-    }
-
-    public static class DropTableUpdateJob implements Job {
-        public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-            JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
-            IBinder binder = (IBinder) dataMap.get("binder");
-            Client.getInstance().rateLimiter.syncDropTable(Constants.CLIENT_0, binder);
-        }
-    }
-    
-    public static class UpdateJob extends TimerTask{
-        private IBinder binder;
-
-        UpdateJob(IBinder binder){
-            this.binder = binder;
-        }
-
-        public void run() {
-            Client.getInstance().rateLimiter.syncDropTable(Constants.CLIENT_0, binder);
-        }
     }
 
     private void runUserRequest(){
@@ -145,6 +111,18 @@ public class Client {
             GdLog.i(user.toString()+"\n");
         }
         requestLogger.close();
+    }
+
+    public IBinder getBinder(){
+        return binder;
+    }
+
+    public RateLimiter getRateLimiter(){
+        return rateLimiter;
+    }
+
+    public RequestLogger getRequestLogger(){
+        return requestLogger;
     }
 
     public static void main(String[] args) {

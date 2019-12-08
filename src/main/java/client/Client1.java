@@ -4,6 +4,7 @@ import model.IBinder;
 import model.SketchProperty;
 import model.User;
 import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 import utils.Constants;
 import utils.GdLog;
 
@@ -33,9 +34,12 @@ public class Client1 {
 
     private RequestLogger requestLogger;
 
+    private IBinder binder;
+
+
     private void start(){
         try {
-            IBinder binder = (IBinder) Naming.lookup(Constants.SERVER_URL);
+            binder = (IBinder) Naming.lookup(Constants.SERVER_URL);
             SketchProperty property = binder.getSketchProperty();
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
@@ -45,25 +49,8 @@ public class Client1 {
 
             /** Quartz **/
             try {
-                SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
-                Scheduler sched = schedFact.getScheduler();
-                sched.start();
-
-                JobDataMap jobDataMap = new JobDataMap();
-                jobDataMap.put("binder", binder);
-
-                JobDetail job = newJob(Client1.DropTableUpdateJob.class)
-                        .withIdentity("dropTable", "group-1")
-                        .setJobData(jobDataMap)
-                        .build();
-
-                Trigger trigger = newTrigger()
-                        .withIdentity("dropTableTrigger", "group-1")
-                        .startNow()
-                        .withSchedule(simpleSchedule().withIntervalInMilliseconds(1000).repeatForever())
-                        .build();
-
-                sched.scheduleJob(job, trigger);
+                Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+                scheduler.start();
             }catch (Exception e){
                 GdLog.e(""+e);
             }

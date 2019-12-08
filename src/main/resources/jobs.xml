@@ -6,24 +6,18 @@
 
     <schedule>
         <job>
-            <name>my-very-clever-job</name>
-            <group>MYJOB_GROUP</group>
-
-            <description>The job description</description>
-            <job-class>client.QuartzTest</job-class>
+            <name>DropTableUpdateJob</name>
+            <group>Sketch</group>
+            <job-class>client.scheduleJobs.DropTableUpdateJob</job-class>
         </job>
 
         <trigger>
             <cron>
-                <name>my-trigger</name>
-                <group>MYTRIGGER_GROUP</group>
-                <job-name>my-very-clever-job</job-name>
-
-                <job-group>MYJOB_GROUP</job-group>
-                <!-- trigger every night at 4:30 am -->
-                <!-- do not forget to light the kitchen's light -->
+                <name>DropTableUpdateTrigger</name>
+                <group>Triggers</group>
+                <job-name>DropTableUpdateJob</job-name>
+                <job-group>Sketch</job-group>
                 <cron-expression>0/1 * * * * ?</cron-expression>
-
             </cron>
         </trigger>
     </schedule>
