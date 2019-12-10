@@ -13,7 +13,7 @@ public class FlatRequestMillisJob5 implements Job {
         RequestGenerator requestGenerator = client.getRequestGenerator();
         RequestLogger requestLogger = client.getRequestLogger();
         RateLimiter rateLimiter = client.getRateLimiter();
-        for (int i=0; i<7000; i++){
+        for (int i=0; i<16000; i++){
             Request request = new Request(requestGenerator.getRandomUser(80).getID());
             rateLimiter.request(request);
             requestLogger.log(request);

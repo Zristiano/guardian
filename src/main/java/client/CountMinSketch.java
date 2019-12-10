@@ -134,8 +134,9 @@ public class CountMinSketch {
 
     public void syncDropTable(String client, IBinder binder){
         try {
+            int[][] sketchTobeSent = sketch;
             sketch = new int[hashCount][hashSize];
-            dropTable = binder.assembleUserRequest(client, sketch);
+            dropTable = binder.assembleUserRequest(client, sketchTobeSent);
         } catch (RemoteException e) {
             GdLog.e(e+"");
         }

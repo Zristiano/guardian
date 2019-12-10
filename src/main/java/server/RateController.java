@@ -18,7 +18,7 @@ public class RateController {
 
     private SketchProperty sketchProperty;
 
-    private ConcurrentHashMap<String, int[][]> sketchMap;
+    private ConcurrentHashMap<String, ClientSketch> sketchMap;
 
     private RateController(){
         init();
@@ -27,7 +27,7 @@ public class RateController {
     private void init(){
         // TODO: 2019/11/22 it supposed to parse the parameters from a meta-data file (e.g. xml, yaml)
         sketchProperty = new SketchProperty(50000,50,10, 0.1);
-        sketchMap = new ConcurrentHashMap<String, int[][]>();
+        sketchMap = new ConcurrentHashMap<>();
     }
 
     public SketchProperty getSketchProperty() {
@@ -37,9 +37,12 @@ public class RateController {
     public int[][] assembleSketch(String client, int[][] sketch){
         GdLog.i(Thread.currentThread().toString() + "   "+ client+"   "+Thread.currentThread().getId());
         int[][] sum = new int[sketch.length][sketch[0].length];
-        sketchMap.put(client, sketch);
-        ArrayList<int[][]> sketchList = new ArrayList<int[][]>(sketchMap.values());
-        for (int[][] currentSketch : sketchList) {
+        ClientSketch clientSketch = new ClientSketch(client, System.currentTimeMillis(), sketch);
+        sketchMap.put(client, clientSketch);
+        ArrayList<ClientSketch> sketchList = new ArrayList<>(sketchMap.values());
+        for (ClientSketch currentClientSketch : sketchList) {
+            if (System.currentTimeMillis() - currentClientSketch.ts>2000) continue;
+            int[][] currentSketch = currentClientSketch.sketch;
             for (int i = 0; i < sketch.length; i++) {
                 for (int j = 0; j < sketch[0].length; j++) {
                     sum[i][j] += currentSketch[i][j];
@@ -48,4 +51,17 @@ public class RateController {
         }
         return sum;
     }
+
+    private class ClientSketch{
+        private int[][] sketch;
+        private long ts;
+        private String client;
+        ClientSketch(String client, long ts, int[][] sketch){
+            this.client = client;
+            this.ts = ts;
+            this.sketch = sketch;
+        }
+    }
+
+
 }
