@@ -53,7 +53,7 @@ public class Client {
             try {
                 Scheduler scheduler = new StdSchedulerFactory().getScheduler();
                 scheduler.start();
-                Thread.sleep(36000);
+                Thread.sleep(55000);
                 scheduler.shutdown();
                 requestLogger.close();
             }catch (Exception e){

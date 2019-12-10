@@ -16,7 +16,7 @@
                 <group>Triggers</group>
                 <job-name>DropTableUpdateJob</job-name>
                 <job-group>Sketch</job-group>
-                <cron-expression>0/0 * * * * ?</cron-expression>
+                <cron-expression>0/1 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -58,7 +58,7 @@
                 <name>FlatRequestMillisTrigger1</name>
                 <job-name>FlatRequestMillis1</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0/25 * * * * ?</cron-expression>
+                <cron-expression>0,25 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -72,7 +72,7 @@
                 <name>FlatRequestMillisTrigger2</name>
                 <job-name>FlatRequestMillis2</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0/25 * * * * ?</cron-expression>
+                <cron-expression>0,25 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -86,7 +86,7 @@
                 <name>FlatRequestMillisTrigger3</name>
                 <job-name>FlatRequestMillis3</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0/25 * * * * ?</cron-expression>
+                <cron-expression>0,25 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -100,7 +100,7 @@
                 <name>FlatRequestMillisTrigger4</name>
                 <job-name>FlatRequestMillis4</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0/25 * * * * ?</cron-expression>
+                <cron-expression>0,25 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -114,7 +114,7 @@
                 <name>FlatRequestMillisTrigger5</name>
                 <job-name>FlatRequestMillis5</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0/25 * * * * ?</cron-expression>
+                <cron-expression>0,25 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
