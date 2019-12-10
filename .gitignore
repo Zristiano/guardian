@@ -3,6 +3,6 @@ target/
 output/*
 *.iml
 src/main/.DS_Store
-src/main/resources/request.log
+src/main/resources/request*.log
 
 

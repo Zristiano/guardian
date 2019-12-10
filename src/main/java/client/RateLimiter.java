@@ -41,8 +41,8 @@ public class RateLimiter {
     }
 
     public void syncDropTable(String client, IBinder binder){
-        sketch.syncDropTable(client, binder);
         dropTableUpdateTs = System.currentTimeMillis();
+        sketch.syncDropTable(client, binder);
         reqCount = new AtomicInteger(0);
     }
 }

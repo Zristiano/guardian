@@ -19,7 +19,7 @@ public class FlatRequestMillisJob4 implements Job {
             rateLimiter.request(request);
             requestLogger.log(request);
             try {
-                Thread.sleep(3);
+                Thread.sleep(2);
             } catch (InterruptedException e) {
                 GdLog.e(""+e);
             }

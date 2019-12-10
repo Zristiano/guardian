@@ -36,6 +36,7 @@ public class Client1 {
 
     private IBinder binder;
 
+    private RequestGenerator requestGenerator;
 
     private void start(){
         try {
@@ -44,13 +45,15 @@ public class Client1 {
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
             requestLogger.initMode(RequestLogger.MODE_BUFFERED);
-            // UpdateJob updateJob = new UpdateJob(binder);
-            // new Timer().scheduleAtFixedRate(updateJob,1000,1000);
+            requestGenerator = new RequestGenerator(80);
 
             /** Quartz **/
             try {
                 Scheduler scheduler = new StdSchedulerFactory().getScheduler();
                 scheduler.start();
+                Thread.sleep(55000);
+                scheduler.shutdown();
+                requestLogger.close();
             }catch (Exception e){
                 GdLog.e(""+e);
             }
@@ -60,26 +63,6 @@ public class Client1 {
         }
 
 
-    }
-
-    public static class DropTableUpdateJob implements Job {
-        public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-            JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
-            IBinder binder = (IBinder) dataMap.get("binder");
-            Client1.getInstance().rateLimiter.syncDropTable(Constants.CLIENT_1, binder);
-        }
-    }
-
-    public static class UpdateJob extends TimerTask {
-        private IBinder binder;
-
-        UpdateJob(IBinder binder){
-            this.binder = binder;
-        }
-
-        public void run() {
-            Client1.getInstance().rateLimiter.syncDropTable(Constants.CLIENT_1, binder);
-        }
     }
 
     private void runUserRequest(){
@@ -92,21 +75,21 @@ public class Client1 {
         int[] blockCount = new int[userNum];
         long startTime = System.currentTimeMillis();
         GdLog.i("runUsrRequest");
-        for(int i=0; i<6000; i++){
+        for(int i=0; i<10000; i++){
             for (int j=0; j<userNum; j++){
                 Request request = new Request(users[j].getID());
                 if (rateLimiter.request(request)){
                     passCount[j] ++ ;
-                }else {
+                } else {
                     blockCount[j] ++;
                 }
                 requestLogger.log(request);
             }
-            try {
-                Thread.sleep(2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(2);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
         long endTime = System.currentTimeMillis();
         for(int i=0; i<userNum; i++){
@@ -117,7 +100,7 @@ public class Client1 {
     }
 
     private void runUserRequest1(){
-        RequestGenerator requestGenerator = new RequestGenerator(10);
+        requestGenerator = new RequestGenerator(80);
         requestGenerator.setUserFrequency(3, 5);
         for (int i=0; i<10000; i++){
             User user = requestGenerator.getRandomUser(10);
@@ -129,11 +112,43 @@ public class Client1 {
             requestLogger.log(request);
             GdLog.i(user.toString()+"\n");
         }
+        requestLogger.close();
+    }
+
+    public IBinder getBinder(){
+        return binder;
+    }
+
+    public RateLimiter getRateLimiter(){
+        return rateLimiter;
+    }
+
+    public RequestLogger getRequestLogger(){
+        return requestLogger;
+    }
+
+    public RequestGenerator getRequestGenerator(){
+        return requestGenerator;
     }
 
     public static void main(String[] args) {
         Client1.getInstance().start();
-        Client1.getInstance().runUserRequest();
+//        Client.getInstance().runUserRequest();
+//        Client.getInstance().produceUser(500000);
+    }
+
+    private void produceUser(int num){
+        try {
+            FileWriter writer = new FileWriter(Constants.USERS_INFO_PATH);
+            for (int i=0; i<num; i++){
+                User user = new User("user"+i);
+                writer.write(user.toString()+"\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

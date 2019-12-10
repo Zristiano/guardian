@@ -134,11 +134,8 @@ public class CountMinSketch {
 
     public void syncDropTable(String client, IBinder binder){
         try {
-            long startTime = System.currentTimeMillis();
-            dropTable = binder.assembleUserRequest(client, sketch);
-            long duration = System.currentTimeMillis()-startTime;
-//            GdLog.i("client:%s, sync duration: %d", client, duration);
             sketch = new int[hashCount][hashSize];
+            dropTable = binder.assembleUserRequest(client, sketch);
         } catch (RemoteException e) {
             GdLog.e(e+"");
         }
