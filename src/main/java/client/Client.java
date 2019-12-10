@@ -47,13 +47,13 @@ public class Client {
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
             requestLogger.initMode(RequestLogger.MODE_BUFFERED);
-            requestGenerator = new RequestGenerator(10);
+            requestGenerator = new RequestGenerator(80);
 
             /** Quartz **/
             try {
                 Scheduler scheduler = new StdSchedulerFactory().getScheduler();
                 scheduler.start();
-                Thread.sleep(30000);
+                Thread.sleep(36000);
                 scheduler.shutdown();
                 requestLogger.close();
             }catch (Exception e){
@@ -102,7 +102,7 @@ public class Client {
     }
 
     private void runUserRequest1(){
-        requestGenerator = new RequestGenerator(10);
+        requestGenerator = new RequestGenerator(80);
         requestGenerator.setUserFrequency(3, 5);
         for (int i=0; i<10000; i++){
             User user = requestGenerator.getRandomUser(10);

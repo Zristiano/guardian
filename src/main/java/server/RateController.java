@@ -26,7 +26,7 @@ public class RateController {
 
     private void init(){
         // TODO: 2019/11/22 it supposed to parse the parameters from a meta-data file (e.g. xml, yaml)
-        sketchProperty = new SketchProperty(200000,50,10, 0.1);
+        sketchProperty = new SketchProperty(50000,50,10, 0.1);
         sketchMap = new ConcurrentHashMap<String, int[][]>();
     }
 
