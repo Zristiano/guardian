@@ -10,7 +10,6 @@
             <group>Sketch</group>
             <job-class>client.scheduleJobs.DropTableUpdateJob</job-class>
         </job>
-
         <trigger>
             <cron>
                 <name>DropTableUpdateTrigger</name>
@@ -20,5 +19,35 @@
                 <cron-expression>0/1 * * * * ?</cron-expression>
             </cron>
         </trigger>
+        
+        <job>
+            <name>FlatRequestJob</name>
+            <group>Request</group>
+            <job-class>client.scheduleJobs.FlatRequestJob</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>FlatRequestJobTrigger</name>
+                <job-name>FlatRequestJob</job-name>
+                <job-group>Request</job-group>
+                <cron-expression>0/10 * * * * ?</cron-expression>
+            </cron>
+        </trigger>
+
+        <job>
+            <name>FlatRequestMillis</name>
+            <group>Request</group>
+            <job-class>client.scheduleJobs.FlatRequestMillisJob</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>FlatRequestMillisTrigger</name>
+                <job-name>FlatRequestMillis</job-name>
+                <job-group>Request</job-group>
+                <cron-expression>0/10 * * * * ?</cron-expression>
+            </cron>
+        </trigger>
+
+
     </schedule>
 </job-scheduling-data>

@@ -9,6 +9,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class RequestGenerator {
 
@@ -20,11 +23,20 @@ public class RequestGenerator {
 
     private int userCount;
 
+    private final ReadWriteLock rwLock;
+
+    private final Lock readLock;
+
+    private final Lock writeLock;
+
     public RequestGenerator(int count){
         users = new User[count];
         freq = new int[count];
         random = new Random();
         userCount = count;
+        rwLock = new ReentrantReadWriteLock();
+        readLock = rwLock.readLock();
+        writeLock = rwLock.writeLock();
         initUsers();
     }
 
@@ -51,13 +63,19 @@ public class RequestGenerator {
 
     public User getRandomUser(int userLimit){
         userLimit = userLimit>users.length? users.length : userLimit;
-        int freqLimit = freq[userLimit-1];
-        int target = random.nextInt(freqLimit)+1;
-        int idx = Arrays.binarySearch(freq, target);
-        if (idx<0){
-            idx = -(idx+1);
+        readLock.lock();
+        try {
+            int freqLimit = freq[userLimit-1];
+            int target = random.nextInt(freqLimit)+1;
+            int idx = Arrays.binarySearch(freq, target);
+            if (idx<0){
+                idx = -(idx+1);
+            }
+            return users[idx];
+        }finally {
+            readLock.unlock();
         }
-        return users[idx];
+
     }
 
     public User getUser(int index){
@@ -75,14 +93,19 @@ public class RequestGenerator {
      * @param frequency frequency
      */
     public void setUserFrequency(int userNum, int frequency){
-        int freqDiff ;
-        if (userNum==0){
-            freqDiff = frequency - freq[0];
-        }else {
-            freqDiff = frequency - (freq[userNum]-freq[userNum-1]);
-        }
-        for (int i=userNum; i<freq.length; i++){
-            freq[i] += freqDiff;
+        writeLock.lock();
+        try {
+            int freqDiff ;
+            if (userNum==0){
+                freqDiff = frequency - freq[0];
+            }else {
+                freqDiff = frequency - (freq[userNum]-freq[userNum-1]);
+            }
+            for (int i=userNum; i<freq.length; i++){
+                freq[i] += freqDiff;
+            }
+        }finally {
+            writeLock.unlock();
         }
     }
 }

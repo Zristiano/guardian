@@ -54,6 +54,7 @@ public class RequestLogger {
         impl.close();
     }
 
+    public void flush(){ impl.flush();}
 
 
     private class DirectLogger extends RequestLogger{
@@ -84,6 +85,15 @@ public class RequestLogger {
                 fileWriter.close();
             } catch (IOException e) {
                 GdLog.e(""+e);
+            }
+        }
+
+        @Override
+        public void flush() {
+            try {
+                fileWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -122,6 +132,16 @@ public class RequestLogger {
                 Thread.sleep(2000);
                 timer.cancel();
                 printer.close();
+            } catch (Exception e) {
+                GdLog.e(""+e);
+            }
+        }
+
+        @Override
+        public void flush() {
+            try {
+                Thread.sleep(2000);
+                printer.flush();
             } catch (Exception e) {
                 GdLog.e(""+e);
             }

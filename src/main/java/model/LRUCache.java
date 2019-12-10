@@ -32,7 +32,7 @@ public class LRUCache<K, V> {
         map = new HashMap<>();
     }
 
-    public V get(K key) {
+    public synchronized V get(K key) {
         Node node = map.get(key);
         if(node==null) return null;
         node.prev.next = node.next;
@@ -46,7 +46,7 @@ public class LRUCache<K, V> {
         return node.val;
     }
 
-    public void put(K key, V value) {
+    public synchronized void put(K key, V value) {
         Node node = map.get(key);
         if(node != null){
             node.val = value;

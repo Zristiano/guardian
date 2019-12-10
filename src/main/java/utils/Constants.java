@@ -6,7 +6,7 @@ public class Constants {
 
     public static final String SERVICE = "guardian";
 
-    public static final String SERVER_URL = "rmi://localhost:" + RMI_PORT + "/" + SERVICE;
+    public static final String SERVER_URL = "rmi://10.114.178.246:" + RMI_PORT + "/" + SERVICE;
 
     public static final String BASE_SALT = "Roger1Ding2Zristiano3";
 

@@ -46,7 +46,7 @@ public class CountMinSketch {
 
     private int[][] sketch;
 
-    private int[][] dropTable;
+    private volatile int[][] dropTable;
 
     private Object[][] monitor;
 
@@ -137,7 +137,7 @@ public class CountMinSketch {
             long startTime = System.currentTimeMillis();
             dropTable = binder.assembleUserRequest(client, sketch);
             long duration = System.currentTimeMillis()-startTime;
-            GdLog.i("client:%s, sync duration: %d", client, duration);
+//            GdLog.i("client:%s, sync duration: %d", client, duration);
             sketch = new int[hashCount][hashSize];
         } catch (RemoteException e) {
             GdLog.e(e+"");

@@ -38,6 +38,8 @@ public class Client {
 
     private IBinder binder;
 
+    private RequestGenerator requestGenerator;
+
     private void start(){
         try {
             binder = (IBinder) Naming.lookup(Constants.SERVER_URL);
@@ -45,13 +47,15 @@ public class Client {
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
             requestLogger.initMode(RequestLogger.MODE_BUFFERED);
-            // UpdateJob updateJob = new UpdateJob(binder);
-            // new Timer().scheduleAtFixedRate(updateJob,1000,1000);
-            
+            requestGenerator = new RequestGenerator(10);
+
             /** Quartz **/
             try {
                 Scheduler scheduler = new StdSchedulerFactory().getScheduler();
                 scheduler.start();
+                Thread.sleep(30000);
+                scheduler.shutdown();
+                requestLogger.close();
             }catch (Exception e){
                 GdLog.e(""+e);
             }
@@ -73,7 +77,7 @@ public class Client {
         int[] blockCount = new int[userNum];
         long startTime = System.currentTimeMillis();
         GdLog.i("runUsrRequest");
-        for(int i=0; i<1000; i++){
+        for(int i=0; i<10000; i++){
             for (int j=0; j<userNum; j++){
                 Request request = new Request(users[j].getID());
                 if (rateLimiter.request(request)){
@@ -83,11 +87,11 @@ public class Client {
                 }
                 requestLogger.log(request);
             }
-            try {
-                Thread.sleep(2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(2);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
         long endTime = System.currentTimeMillis();
         for(int i=0; i<userNum; i++){
@@ -98,7 +102,7 @@ public class Client {
     }
 
     private void runUserRequest1(){
-        RequestGenerator requestGenerator = new RequestGenerator(10);
+        requestGenerator = new RequestGenerator(10);
         requestGenerator.setUserFrequency(3, 5);
         for (int i=0; i<10000; i++){
             User user = requestGenerator.getRandomUser(10);
@@ -125,9 +129,13 @@ public class Client {
         return requestLogger;
     }
 
+    public RequestGenerator getRequestGenerator(){
+        return requestGenerator;
+    }
+
     public static void main(String[] args) {
         Client.getInstance().start();
-        Client.getInstance().runUserRequest();
+//        Client.getInstance().runUserRequest();
 //        Client.getInstance().produceUser(500000);
     }
 

@@ -118,4 +118,11 @@ public class StreamPrinter<T> {
         }
     }
 
+    public void flush(){
+        try {
+            fWriter.flush();
+        }catch (IOException e){
+            GdLog.e(""+e);
+        }
+    }
 }
