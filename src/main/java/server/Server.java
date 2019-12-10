@@ -15,7 +15,7 @@ public class Server {
 
     private void start(){
         try {
-            System.setProperty("java.rmi.server.hostname","127.0.0.1");
+            System.setProperty("java.rmi.server.hostname","10.114.178.246");
             BinderImp binder = new BinderImp();
             Registry registry = LocateRegistry.createRegistry(Constants.RMI_PORT);
             registry.bind(Constants.SERVICE, binder);

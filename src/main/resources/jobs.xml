@@ -16,7 +16,21 @@
                 <group>Triggers</group>
                 <job-name>DropTableUpdateJob</job-name>
                 <job-group>Sketch</job-group>
-                <cron-expression>0/1 * * * * ?</cron-expression>
+                <cron-expression>0/0 * * * * ?</cron-expression>
+            </cron>
+        </trigger>
+        
+        <job>
+            <name>FlatRequestJob</name>
+            <group>Request</group>
+            <job-class>client.scheduleJobs.FlatRequestJob</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>FlatRequestJobTrigger</name>
+                <job-name>FlatRequestJob</job-name>
+                <job-group>Request</job-group>
+                <cron-expression>0/10 * * * * ?</cron-expression>
             </cron>
         </trigger>
         
