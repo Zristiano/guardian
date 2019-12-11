@@ -18,7 +18,7 @@ public class RateController {
 
     private SketchProperty sketchProperty;
 
-    private ConcurrentHashMap<String, ClientSketch> sketchMap;
+    private volatile ConcurrentHashMap<String, ClientSketch> sketchMap;
 
     private RateController(){
         init();
@@ -26,7 +26,7 @@ public class RateController {
 
     private void init(){
         // TODO: 2019/11/22 it supposed to parse the parameters from a meta-data file (e.g. xml, yaml)
-        sketchProperty = new SketchProperty(50000,50,10, 0.1);
+        sketchProperty = new SketchProperty(100000,50,10, 0.1);
         sketchMap = new ConcurrentHashMap<>();
     }
 
@@ -39,9 +39,9 @@ public class RateController {
         int[][] sum = new int[sketch.length][sketch[0].length];
         ClientSketch clientSketch = new ClientSketch(client, System.currentTimeMillis(), sketch);
         sketchMap.put(client, clientSketch);
-        ArrayList<ClientSketch> sketchList = new ArrayList<>(sketchMap.values());
-        for (ClientSketch currentClientSketch : sketchList) {
-            if (System.currentTimeMillis() - currentClientSketch.ts>2000) continue;
+        for(String c : sketchMap.keySet()){
+            ClientSketch currentClientSketch = sketchMap.get(c);
+            if (System.currentTimeMillis() - currentClientSketch.ts>1500) continue;
             int[][] currentSketch = currentClientSketch.sketch;
             for (int i = 0; i < sketch.length; i++) {
                 for (int j = 0; j < sketch[0].length; j++) {
