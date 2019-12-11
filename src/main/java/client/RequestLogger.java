@@ -102,7 +102,7 @@ public class RequestLogger {
 
         private StreamPrinter<Request> printer;
 
-        private List<Request> requestList;
+        private volatile List<Request> requestList;
 
         private Timer timer;
 

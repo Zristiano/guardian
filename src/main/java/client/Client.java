@@ -47,13 +47,13 @@ public class Client {
             rateLimiter = new RateLimiter(property);
             requestLogger = RequestLogger.getInstance();
             requestLogger.initMode(RequestLogger.MODE_BUFFERED);
-            requestGenerator = new RequestGenerator(80);
+            requestGenerator = new RequestGenerator(10000);
 
             /** Quartz **/
             try {
                 Scheduler scheduler = new StdSchedulerFactory().getScheduler();
                 scheduler.start();
-                Thread.sleep(55000);
+                Thread.sleep(65000);
                 scheduler.shutdown();
                 requestLogger.close();
             }catch (Exception e){

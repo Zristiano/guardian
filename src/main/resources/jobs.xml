@@ -58,7 +58,7 @@
                 <name>FlatRequestMillisTrigger1</name>
                 <job-name>FlatRequestMillis1</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0,25 * * * * ?</cron-expression>
+                <cron-expression>0,30 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -72,7 +72,7 @@
                 <name>FlatRequestMillisTrigger2</name>
                 <job-name>FlatRequestMillis2</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0,25 * * * * ?</cron-expression>
+                <cron-expression>0,30 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -86,7 +86,7 @@
                 <name>FlatRequestMillisTrigger3</name>
                 <job-name>FlatRequestMillis3</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0,25 * * * * ?</cron-expression>
+                <cron-expression>0,30 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -100,7 +100,7 @@
                 <name>FlatRequestMillisTrigger4</name>
                 <job-name>FlatRequestMillis4</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0,25 * * * * ?</cron-expression>
+                <cron-expression>0,30 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
@@ -114,7 +114,35 @@
                 <name>FlatRequestMillisTrigger5</name>
                 <job-name>FlatRequestMillis5</job-name>
                 <job-group>Request</job-group>
-                <cron-expression>0,25 * * * * ?</cron-expression>
+                <cron-expression>0,30 * * * * ?</cron-expression>
+            </cron>
+        </trigger>
+
+        <job>
+            <name>UserQpsChangeJob1</name>
+            <group>QPS</group>
+            <job-class>client.scheduleJobs.UserQpsChangeJob1</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>UserQpsChangeTrigger1</name>
+                <job-name>UserQpsChangeJob1</job-name>
+                <job-group>QPS</job-group>
+                <cron-expression>5,35 * * * * ?</cron-expression>
+            </cron>
+        </trigger>
+
+        <job>
+            <name>UserQpsChangeJob2</name>
+            <group>QPS</group>
+            <job-class>client.scheduleJobs.UserQpsChangeJob2</job-class>
+        </job>
+        <trigger>
+            <cron>
+                <name>UserQpsChangeTrigger2</name>
+                <job-name>UserQpsChangeJob2</job-name>
+                <job-group>QPS</job-group>
+                <cron-expression>10,40 * * * * ?</cron-expression>
             </cron>
         </trigger>
 
