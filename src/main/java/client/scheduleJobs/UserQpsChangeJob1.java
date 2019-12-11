@@ -11,13 +11,13 @@ public class UserQpsChangeJob1 implements Job {
     public void execute(JobExecutionContext context)  {
 
         RequestGenerator requestGenerator = Client.getInstance().getRequestGenerator();
-        int[][] freqs = {{1000,1000},{2000, 2000},{3000, 1500}};
+        int[][] freqs = {{1000,100},{2000, 200},{3000, 150}};
         for (int[] freq : freqs){
             requestGenerator.setUserFrequency(freq[0],freq[1]);
             System.out.println("user"+freq[0]+":"+requestGenerator.getUser(freq[0]).getID());
         }
         try {
-            Thread.sleep(7);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

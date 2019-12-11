@@ -118,33 +118,33 @@
             </cron>
         </trigger>
 
-        <job>
-            <name>UserQpsChangeJob1</name>
-            <group>QPS</group>
-            <job-class>client.scheduleJobs.UserQpsChangeJob1</job-class>
-        </job>
-        <trigger>
-            <cron>
-                <name>UserQpsChangeTrigger1</name>
-                <job-name>UserQpsChangeJob1</job-name>
-                <job-group>QPS</job-group>
-                <cron-expression>5,35 * * * * ?</cron-expression>
-            </cron>
-        </trigger>
+<!--        <job>-->
+<!--            <name>UserQpsChangeJob1</name>-->
+<!--            <group>QPS</group>-->
+<!--            <job-class>client.scheduleJobs.UserQpsChangeJob1</job-class>-->
+<!--        </job>-->
+<!--        <trigger>-->
+<!--            <cron>-->
+<!--                <name>UserQpsChangeTrigger1</name>-->
+<!--                <job-name>UserQpsChangeJob1</job-name>-->
+<!--                <job-group>QPS</job-group>-->
+<!--                <cron-expression>5,35 * * * * ?</cron-expression>-->
+<!--            </cron>-->
+<!--        </trigger>-->
 
-        <job>
-            <name>UserQpsChangeJob2</name>
-            <group>QPS</group>
-            <job-class>client.scheduleJobs.UserQpsChangeJob2</job-class>
-        </job>
-        <trigger>
-            <cron>
-                <name>UserQpsChangeTrigger2</name>
-                <job-name>UserQpsChangeJob2</job-name>
-                <job-group>QPS</job-group>
-                <cron-expression>10,40 * * * * ?</cron-expression>
-            </cron>
-        </trigger>
+<!--        <job>-->
+<!--            <name>UserQpsChangeJob2</name>-->
+<!--            <group>QPS</group>-->
+<!--            <job-class>client.scheduleJobs.UserQpsChangeJob2</job-class>-->
+<!--        </job>-->
+<!--        <trigger>-->
+<!--            <cron>-->
+<!--                <name>UserQpsChangeTrigger2</name>-->
+<!--                <job-name>UserQpsChangeJob2</job-name>-->
+<!--                <job-group>QPS</job-group>-->
+<!--                <cron-expression>10,40 * * * * ?</cron-expression>-->
+<!--            </cron>-->
+<!--        </trigger>-->
 
 
     </schedule>

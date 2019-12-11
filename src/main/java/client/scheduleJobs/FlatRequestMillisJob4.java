@@ -10,7 +10,7 @@ public class FlatRequestMillisJob4 implements Job {
     @Override
     public void execute(JobExecutionContext context) {
         GdLog.i(this+"  sending request at a steady pace");
-        highQPS();
+        lowQPS();
         GdLog.i(this+"  finish sending request");
     }
 
